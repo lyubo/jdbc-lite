@@ -1,0 +1,64 @@
+<project name="JAR File Builder" default="dist" basedir=".">
+
+	<target name="dist" depends="clean,compile">
+        <jar jarfile="${basedir}/sqlite.jar" basedir="${basedir}/bin">
+           <metainf dir="${basedir}/src/META-INF">
+              <include name="**/*"/>
+           </metainf>
+        </jar>
+    </target>
+    
+    <target name="clean">
+        <delete file="${basedir}/sqlite.jar"/>
+    </target>
+    
+    <target name="compile">
+        <delete includeemptydirs="true">
+          <fileset dir="bin" includes="**/*"/>
+        </delete>
+        <javac srcdir="${basedir}/src" destdir="${basedir}/bin" debug="yes"  includeantruntime="false">
+          <classpath>
+            <fileset dir="lib">
+               <include name="**/*.jar"/>
+            </fileset>
+          </classpath>
+        </javac>
+    </target>
+
+    <target name="tests-compile">
+        <delete includeemptydirs="true">
+          <fileset dir="tests-bin" includes="**/*"/>
+        </delete>
+        <javac srcdir="${basedir}/tests" destdir="${basedir}/tests-bin" debug="yes" includeantruntime="false">
+          <classpath>
+          	<pathelement location="/usr/share/java/junit4.jar"/>
+            <fileset dir="${basedir}">
+               <include name="sqlite.jar"/>
+               <include name="lib/jna.jar"/>
+            </fileset>
+          </classpath>
+        </javac>
+    </target>
+
+	<target name="test" depends="tests-compile">
+        <junit fork="yes">
+          <formatter type="brief" usefile="no"/>
+          <classpath>
+          	<pathelement location="/usr/share/java/hamcrest-core.jar"/>
+          	<pathelement location="/usr/share/java/junit4.jar"/>
+          	<pathelement location="${basedir}/tests-bin"/>
+            <fileset dir="${basedir}">
+               <include name="sqlite.jar"/>
+               <include name="lib/jna.jar"/>
+            </fileset>
+          </classpath>
+         <batchtest>
+           <fileset dir="${basedir}/tests"><include name="**/Test*.java"/></fileset>
+         </batchtest>
+        </junit>
+        <delete includeemptydirs="true">
+          <fileset dir="." includes="test*.db"/>
+        </delete>
+    </target>
+	
+</project>
